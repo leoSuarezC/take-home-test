@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -42,10 +43,18 @@ namespace Fundo.Applications.WebApi
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(
                         new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
+
+            services.AddProblemDetails();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Unhandled exceptions are logged and returned as a generic
+            // RFC 9110 problem response, never as a stack trace.
+            app.UseExceptionHandler();
+
+            app.UseSerilogRequestLogging();
+
             app.UseRouting();
             app.UseCors(FrontendCorsPolicy);
             app.UseAuthorization();

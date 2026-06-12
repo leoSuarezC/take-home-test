@@ -1,8 +1,9 @@
 using Fundo.Applications.WebApi.Data;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 using System;
 
 namespace Fundo.Applications.WebApi
@@ -11,9 +12,17 @@ namespace Fundo.Applications.WebApi
     {
         public static void Main(string[] args)
         {
+            // Bootstrap logger: captures failures that happen before the host
+            // (and its configuration-driven logger) is built, e.g. migration errors.
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
+
             try
             {
-                var host = CreateWebHostBuilder(args).Build();
+                Log.Information("Starting Loan Management API");
+
+                var host = CreateHostBuilder(args).Build();
 
                 ApplyMigrations(host);
 
@@ -21,21 +30,24 @@ namespace Fundo.Applications.WebApi
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unhandled WebApi exception: {ex.Message}");
+                Log.Fatal(ex, "Application terminated unexpectedly");
             }
             finally
             {
-                Console.WriteLine("Application shutting down.");
+                Log.Information("Application shutting down");
+                Log.CloseAndFlush();
             }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+            return Host.CreateDefaultBuilder(args)
+                .UseSerilog((context, configuration) =>
+                    configuration.ReadFrom.Configuration(context.Configuration))
+                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
         }
 
-        private static void ApplyMigrations(IWebHost host)
+        private static void ApplyMigrations(IHost host)
         {
             using var scope = host.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<LoanManagementDbContext>();

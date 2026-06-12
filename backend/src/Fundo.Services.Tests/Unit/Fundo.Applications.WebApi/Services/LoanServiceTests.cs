@@ -5,6 +5,7 @@ using Fundo.Applications.WebApi.Domain;
 using Fundo.Applications.WebApi.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -33,7 +34,7 @@ namespace Fundo.Services.Tests.Unit
             _dbContext = new LoanManagementDbContext(options);
             _dbContext.Database.EnsureCreated();
 
-            _service = new LoanService(_dbContext);
+            _service = new LoanService(_dbContext, NullLogger<LoanService>.Instance);
         }
 
         public void Dispose()

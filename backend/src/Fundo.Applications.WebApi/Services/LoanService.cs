@@ -2,6 +2,7 @@ using Fundo.Applications.WebApi.Contracts;
 using Fundo.Applications.WebApi.Data;
 using Fundo.Applications.WebApi.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,10 +12,12 @@ namespace Fundo.Applications.WebApi.Services
     public class LoanService : ILoanService
     {
         private readonly LoanManagementDbContext _dbContext;
+        private readonly ILogger<LoanService> _logger;
 
-        public LoanService(LoanManagementDbContext dbContext)
+        public LoanService(LoanManagementDbContext dbContext, ILogger<LoanService> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<LoanResponse>> GetAllAsync()
@@ -46,6 +49,10 @@ namespace Fundo.Applications.WebApi.Services
             _dbContext.Loans.Add(loan);
             await _dbContext.SaveChangesAsync();
 
+            _logger.LogInformation(
+                "Loan {LoanId} created for {ApplicantName} with amount {Amount}",
+                loan.Id, loan.ApplicantName, loan.Amount);
+
             return ToResponse(loan);
         }
 
@@ -55,21 +62,28 @@ namespace Fundo.Applications.WebApi.Services
 
             if (loan is null)
             {
+                _logger.LogWarning("Payment rejected: loan {LoanId} not found", id);
                 return PaymentResult.LoanNotFound();
             }
 
             if (loan.Status == LoanStatus.Paid)
             {
+                _logger.LogWarning("Payment rejected for loan {LoanId}: loan is already fully paid", id);
                 return PaymentResult.InvalidPayment("Loan is already fully paid.");
             }
 
             if (amount <= 0)
             {
+                _logger.LogWarning(
+                    "Payment rejected for loan {LoanId}: non-positive amount {PaymentAmount}", id, amount);
                 return PaymentResult.InvalidPayment("Payment amount must be greater than zero.");
             }
 
             if (amount > loan.CurrentBalance)
             {
+                _logger.LogWarning(
+                    "Payment rejected for loan {LoanId}: amount {PaymentAmount} exceeds balance {CurrentBalance}",
+                    id, amount, loan.CurrentBalance);
                 return PaymentResult.InvalidPayment(
                     $"Payment amount ({amount}) exceeds the current balance ({loan.CurrentBalance}).");
             }
@@ -82,6 +96,10 @@ namespace Fundo.Applications.WebApi.Services
             }
 
             await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Payment of {PaymentAmount} applied to loan {LoanId}; new balance {CurrentBalance}, status {Status}",
+                amount, loan.Id, loan.CurrentBalance, loan.Status);
 
             return PaymentResult.Success(ToResponse(loan));
         }
