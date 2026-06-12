@@ -134,3 +134,20 @@ Errors follow RFC 9110 Problem Details, e.g. overpaying returns:
 - **Payment history** as its own entity (`Payment` table) instead of only mutating the balance — better auditability for a financial domain.
 - **Pagination** on `GET /loans` once the dataset grows.
 - **Frontend**: loan creation/payment forms, retry button on the error state, and component tests.
+
+## 📷ScreenShots
+
+### BackEnd
+#### Execution
+<img width="973" height="933" alt="image" src="https://github.com/user-attachments/assets/84ae4f1b-9538-4e0e-8ced-07f908c92f0a" />
+<img width="1008" height="229" alt="image" src="https://github.com/user-attachments/assets/3cd23af4-f54a-4186-a6c9-5db57eb291a6" />
+
+
+### FrontEnd
+#### Execution
+<img width="762" height="880" alt="image" src="https://github.com/user-attachments/assets/f7c26822-4110-497d-a0b6-0f8faddc123f" />
+
+#### Render
+<img width="1468" height="1408" alt="image" src="https://github.com/user-attachments/assets/4a3e859a-8295-4eaf-adcd-31a10994e1ee" />
+<img width="1476" height="1389" alt="image" src="https://github.com/user-attachments/assets/b118749d-26cd-4ebb-b14a-7cc61b454e32" />
+
