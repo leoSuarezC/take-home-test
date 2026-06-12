@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Fundo.Applications.WebApi.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,10 +10,18 @@ namespace Fundo.Applications.WebApi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration) { }
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<LoanManagementDbContext>(options =>
+                options.UseSqlServer(_configuration.GetConnectionString("LoanManagementDb")));
+
             services.AddControllers();
         }
 

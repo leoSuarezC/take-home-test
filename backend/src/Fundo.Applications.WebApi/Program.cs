@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore;
+using Fundo.Applications.WebApi.Data;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Fundo.Applications.WebApi
@@ -10,7 +13,11 @@ namespace Fundo.Applications.WebApi
         {
             try
             {
-                CreateWebHostBuilder(args).Build().Run();
+                var host = CreateWebHostBuilder(args).Build();
+
+                ApplyMigrations(host);
+
+                host.Run();
             }
             catch (Exception ex)
             {
@@ -26,6 +33,13 @@ namespace Fundo.Applications.WebApi
         {
             return WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
+        }
+
+        private static void ApplyMigrations(IWebHost host)
+        {
+            using var scope = host.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<LoanManagementDbContext>();
+            dbContext.Database.Migrate();
         }
     }
 }
