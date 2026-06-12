@@ -18,8 +18,10 @@ dotnet run
 
 The following endpoint should return **200 OK**:  
 ```http
-GET -> https://localhost:5001/loan
+GET -> http://localhost:8080/loans
 ```
+
+For full setup instructions (Docker, frontend, API reference), see the [root README](../../README.md).
 
 ## Notes  
 
