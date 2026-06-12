@@ -9,6 +9,15 @@
   &--container {
     width: 60%;
   }
+
+  &--message {
+    margin-top: 20px;
+    color: #7b8187;
+  }
+
+  &--error {
+    color: #b00020;
+  }
 }
 
 .mdc-data-table {
