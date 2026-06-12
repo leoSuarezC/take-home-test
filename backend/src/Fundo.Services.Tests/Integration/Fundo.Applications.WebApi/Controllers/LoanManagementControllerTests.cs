@@ -20,7 +20,7 @@ namespace Fundo.Services.Tests.Integration
         [Fact]
         public async Task GetBalances_ShouldReturnExpectedResult()
         {
-            var response = await _client.GetAsync("/loan");
+            var response = await _client.GetAsync("/loans");
 
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         }

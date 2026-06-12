@@ -1,10 +1,13 @@
 using Fundo.Applications.WebApi.Data;
+using Fundo.Applications.WebApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Fundo.Applications.WebApi
 {
@@ -22,7 +25,12 @@ namespace Fundo.Applications.WebApi
             services.AddDbContext<LoanManagementDbContext>(options =>
                 options.UseSqlServer(_configuration.GetConnectionString("LoanManagementDb")));
 
-            services.AddControllers();
+            services.AddScoped<ILoanService, LoanService>();
+
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
